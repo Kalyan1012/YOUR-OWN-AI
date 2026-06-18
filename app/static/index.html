@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAISS RAG Visualizer</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="app">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">⬡</span>
+                    <span class="logo-text">VectorRAG</span>
+                </div>
+                <div class="status-badge">
+                    <span class="status-dot"></span>
+                    Live
+                </div>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="stat-num" id="statDocs">0</div>
+                    <div class="stat-lbl">Chunks</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num" id="statQueries">0</div>
+                    <div class="stat-lbl">Queries</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num" id="statTime">0ms</div>
+                    <div class="stat-lbl">Last Search</div>
+                </div>
+            </div>
+
+            <!-- Embed Section -->
+            <div class="section">
+                <div class="section-title">
+                    <span class="section-icon">📄</span>
+                    Index Document
+                </div>
+                <div class="form-group">
+                    <label>Document Name</label>
+                    <input
+                        type="text"
+                        id="docName"
+                        class="input"
+                        placeholder="e.g., company-info"
+                    />
+                </div>
+                <div class="form-group">
+                    <label>Content</label>
+                    <textarea
+                        id="docContent"
+                        class="textarea"
+                        placeholder="Paste your document content here..."
+                        rows="6"
+                    ></textarea>
+                </div>
+                <button class="btn btn-green" onclick="embedDocument()" id="embedBtn">
+                    <span id="embedBtnText">⚡ Embed & Index</span>
+                </button>
+            </div>
+
+            <!-- Query Section -->
+            <div class="section">
+                <div class="section-title">
+                    <span class="section-icon">🔍</span>
+                    Query System
+                </div>
+                <div class="form-group">
+                    <label>Your Question</label>
+                    <input
+                        type="text"
+                        id="queryText"
+                        class="input"
+                        placeholder="Ask anything..."
+                        onkeypress="handleEnter(event)"
+                    />
+                </div>
+                <div class="form-group">
+                    <label>Search Algorithm</label>
+                    <div class="algo-toggle">
+                        <button
+                            class="algo-btn active"
+                            id="btnHnsw"
+                            onclick="setAlgo('hnsw')"
+                        >
+                            HNSW <span class="algo-tag">O(log N)</span>
+                        </button>
+                        <button
+                            class="algo-btn"
+                            id="btnBrute"
+                            onclick="setAlgo('brute_force')"
+                        >
+                            Brute Force <span class="algo-tag">O(N)</span>
+                        </button>
+                    </div>
+                </div>
+                <button class="btn btn-blue" onclick="submitQuery()" id="queryBtn">
+                    <span id="queryBtnText">🚀 Execute Query</span>
+                </button>
+            </div>
+
+            <!-- Clear Button -->
+            <div class="section">
+                <button class="btn btn-red" onclick="clearAll()">
+                    🗑️ Clear All Data
+                </button>
+            </div>
+
+            <!-- Model Info -->
+            <div class="model-info">
+                <div class="model-row">
+                    <span class="model-label">Embeddings</span>
+                    <span class="model-val">nomic-embed-text</span>
+                </div>
+                <div class="model-row">
+                    <span class="model-label">LLM</span>
+                    <span class="model-val">Llama 3.2</span>
+                </div>
+                <div class="model-row">
+                    <span class="model-label">Dimensions</span>
+                    <span class="model-val">768D</span>
+                </div>
+                <div class="model-row">
+                    <span class="model-label">Index</span>
+                    <span class="model-val">FAISS</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+
+            <!-- Top Bar -->
+            <div class="topbar">
+                <div class="topbar-left">
+                    <h1 class="page-title">Vector Space Explorer</h1>
+                    <p class="page-sub">Real-time semantic embedding visualization</p>
+                </div>
+                <div class="topbar-right">
+                    <div class="algo-display" id="algoDisplay">
+                        Algorithm: <strong>HNSW</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Canvas Section -->
+            <div class="canvas-card">
+                <div class="canvas-header">
+                    <span class="canvas-title">📊 2D Vector Space Projection</span>
+                    <div class="canvas-badges">
+                        <span class="cbadge green" id="docCount">0 documents</span>
+                        <span class="cbadge blue" id="queryCount">0 queries</span>
+                    </div>
+                </div>
+                <div class="canvas-wrap">
+                    <canvas id="vectorCanvas"></canvas>
+                    <div class="canvas-empty" id="canvasEmpty">
+                        <div class="empty-icon">⬡</div>
+                        <div class="empty-text">Add documents to see vector space</div>
+                    </div>
+                </div>
+                <div class="canvas-legend">
+                    <div class="legend-item">
+                        <span class="ldot green"></span>
+                        Document Vectors
+                    </div>
+                    <div class="legend-item">
+                        <span class="ldot blue"></span>
+                        Query Vector
+                    </div>
+                    <div class="legend-item">
+                        <span class="lline"></span>
+                        Nearest Match
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Grid -->
+            <div class="bottom-grid">
+
+                <!-- Steps / Process Log -->
+                <div class="card">
+                    <div class="card-head">
+                        <span>⚙️ Process Log</span>
+                        <span class="card-badge" id="stepsBadge">Idle</span>
+                    </div>
+                    <div class="steps-list" id="stepsList">
+                        <div class="step-item idle">
+                            <span class="step-dot"></span>
+                            System initialized and ready
+                        </div>
+                        <div class="step-item idle">
+                            <span class="step-dot"></span>
+                            FAISS indexes loaded (BruteForce + HNSW)
+                        </div>
+                        <div class="step-item idle">
+                            <span class="step-dot"></span>
+                            Waiting for documents...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Response -->
+                <div class="card">
+                    <div class="card-head">
+                        <span>💬 LLM Response</span>
+                        <span class="card-badge" id="responseBadge">Ready</span>
+                    </div>
+                    <div class="response-area" id="responseArea">
+                        <div class="response-placeholder">
+                            Response will appear here after querying...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Match Info -->
+                <div class="card">
+                    <div class="card-head">
+                        <span>🎯 Match Details</span>
+                        <span class="card-badge" id="matchBadge">—</span>
+                    </div>
+                    <div class="match-info" id="matchInfo">
+                        <div class="match-placeholder">
+                            Similarity match details will appear here...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
