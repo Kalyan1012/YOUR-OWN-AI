@@ -33,14 +33,14 @@ html, body {
     font-size: 14px;
 }
 
-/* ── App Layout ─────────────────────────────────── */
+/* App Layout */
 .app {
     display: flex;
     height: 100vh;
     overflow: hidden;
 }
 
-/* ── Sidebar ────────────────────────────────────── */
+/* Sidebar */
 .sidebar {
     width: 320px;
     min-width: 320px;
@@ -207,20 +207,20 @@ html, body {
     font-size: 12px;
 }
 
-/* Algo Toggle */
+/* ✅ FIXED: Algorithm Toggle for 3 buttons */
 .algo-toggle {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
 }
 
 .algo-btn {
-    padding: 8px 10px;
+    padding: 8px 6px;
     background: var(--bg);
     border: 1px solid var(--border2);
     border-radius: 8px;
     color: var(--text2);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
@@ -240,7 +240,7 @@ html, body {
 
 .algo-tag {
     display: block;
-    font-size: 10px;
+    font-size: 9px;
     opacity: 0.7;
     font-weight: 400;
     margin-top: 2px;
@@ -330,7 +330,7 @@ html, body {
     font-family: monospace;
 }
 
-/* ── Main Content ────────────────────────────────── */
+/* Main Content */
 .main {
     flex: 1;
     display: flex;
@@ -595,6 +595,18 @@ html, body {
     line-height: 1.8;
 }
 
+.context-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 12px;
+    color: var(--text2);
+    font-style: italic;
+    line-height: 1.6;
+    margin-top: 12px;
+}
+
 /* Match Info */
 .match-info {
     padding: 16px;
@@ -636,34 +648,6 @@ html, body {
 .match-val.green { color: var(--green); }
 .match-val.blue { color: var(--blue); }
 .match-val.orange { color: var(--orange); }
-
-.distance-bar {
-    height: 4px;
-    background: var(--border2);
-    border-radius: 2px;
-    margin-top: 4px;
-    overflow: hidden;
-}
-
-.distance-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--green), var(--orange));
-    border-radius: 2px;
-    transition: width 0.5s ease;
-}
-
-/* Context box */
-.context-box {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px;
-    font-size: 12px;
-    color: var(--text2);
-    font-style: italic;
-    line-height: 1.6;
-    margin-top: 8px;
-}
 
 /* Scrollbars */
 ::-webkit-scrollbar { width: 6px; height: 6px; }

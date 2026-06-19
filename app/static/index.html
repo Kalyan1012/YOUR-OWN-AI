@@ -8,8 +8,6 @@
 </head>
 <body>
     <div class="app">
-
-        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
@@ -22,7 +20,6 @@
                 </div>
             </div>
 
-            <!-- Stats Row -->
             <div class="stats-row">
                 <div class="stat-box">
                     <div class="stat-num" id="statDocs">0</div>
@@ -38,7 +35,6 @@
                 </div>
             </div>
 
-            <!-- Embed Section -->
             <div class="section">
                 <div class="section-title">
                     <span class="section-icon">📄</span>
@@ -46,28 +42,17 @@
                 </div>
                 <div class="form-group">
                     <label>Document Name</label>
-                    <input
-                        type="text"
-                        id="docName"
-                        class="input"
-                        placeholder="e.g., company-info"
-                    />
+                    <input type="text" id="docName" class="input" placeholder="e.g., company-info" />
                 </div>
                 <div class="form-group">
                     <label>Content</label>
-                    <textarea
-                        id="docContent"
-                        class="textarea"
-                        placeholder="Paste your document content here..."
-                        rows="6"
-                    ></textarea>
+                    <textarea id="docContent" class="textarea" placeholder="Paste your document content here..." rows="6"></textarea>
                 </div>
                 <button class="btn btn-green" onclick="embedDocument()" id="embedBtn">
                     <span id="embedBtnText">⚡ Embed & Index</span>
                 </button>
             </div>
 
-            <!-- Query Section -->
             <div class="section">
                 <div class="section-title">
                     <span class="section-icon">🔍</span>
@@ -75,29 +60,18 @@
                 </div>
                 <div class="form-group">
                     <label>Your Question</label>
-                    <input
-                        type="text"
-                        id="queryText"
-                        class="input"
-                        placeholder="Ask anything..."
-                        onkeypress="handleEnter(event)"
-                    />
+                    <input type="text" id="queryText" class="input" placeholder="Ask anything..." onkeypress="handleEnter(event)" />
                 </div>
                 <div class="form-group">
                     <label>Search Algorithm</label>
                     <div class="algo-toggle">
-                        <button
-                            class="algo-btn active"
-                            id="btnHnsw"
-                            onclick="setAlgo('hnsw')"
-                        >
+                        <button class="algo-btn active" id="btnHnsw" onclick="setAlgo('hnsw')">
                             HNSW <span class="algo-tag">O(log N)</span>
                         </button>
-                        <button
-                            class="algo-btn"
-                            id="btnBrute"
-                            onclick="setAlgo('brute_force')"
-                        >
+                        <button class="algo-btn" id="btnKdTree" onclick="setAlgo('kdtree')">
+                            KD-Tree <span class="algo-tag">O(log N)</span>
+                        </button>
+                        <button class="algo-btn" id="btnBrute" onclick="setAlgo('brute_force')">
                             Brute Force <span class="algo-tag">O(N)</span>
                         </button>
                     </div>
@@ -107,14 +81,12 @@
                 </button>
             </div>
 
-            <!-- Clear Button -->
             <div class="section">
                 <button class="btn btn-red" onclick="clearAll()">
                     🗑️ Clear All Data
                 </button>
             </div>
 
-            <!-- Model Info -->
             <div class="model-info">
                 <div class="model-row">
                     <span class="model-label">Embeddings</span>
@@ -129,16 +101,13 @@
                     <span class="model-val">768D</span>
                 </div>
                 <div class="model-row">
-                    <span class="model-label">Index</span>
-                    <span class="model-val">FAISS</span>
+                    <span class="model-label">Algorithms</span>
+                    <span class="model-val">3 Types</span>
                 </div>
             </div>
         </aside>
 
-        <!-- Main Content -->
         <main class="main">
-
-            <!-- Top Bar -->
             <div class="topbar">
                 <div class="topbar-left">
                     <h1 class="page-title">Vector Space Explorer</h1>
@@ -151,7 +120,6 @@
                 </div>
             </div>
 
-            <!-- Canvas Section -->
             <div class="canvas-card">
                 <div class="canvas-header">
                     <span class="canvas-title">📊 2D Vector Space Projection</span>
@@ -183,10 +151,7 @@
                 </div>
             </div>
 
-            <!-- Bottom Grid -->
             <div class="bottom-grid">
-
-                <!-- Steps / Process Log -->
                 <div class="card">
                     <div class="card-head">
                         <span>⚙️ Process Log</span>
@@ -199,7 +164,11 @@
                         </div>
                         <div class="step-item idle">
                             <span class="step-dot"></span>
-                            FAISS indexes loaded (BruteForce + HNSW)
+                            FAISS indexes loaded
+                        </div>
+                        <div class="step-item idle">
+                            <span class="step-dot"></span>
+                            KD-Tree spatial index ready
                         </div>
                         <div class="step-item idle">
                             <span class="step-dot"></span>
@@ -208,7 +177,6 @@
                     </div>
                 </div>
 
-                <!-- Response -->
                 <div class="card">
                     <div class="card-head">
                         <span>💬 LLM Response</span>
@@ -221,7 +189,6 @@
                     </div>
                 </div>
 
-                <!-- Match Info -->
                 <div class="card">
                     <div class="card-head">
                         <span>🎯 Match Details</span>

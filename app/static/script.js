@@ -31,7 +31,7 @@ function setEl(id, value, isHTML = false) {
     }
 }
 
-// ─── Drawing ─────────────────────────────────────────
+// ─── Drawing Functions ─────────────────────────────────
 function toCanvasCoords(x, y) {
     const pad = 60;
     return {
@@ -85,7 +85,6 @@ function drawPoints() {
     indexedPoints.forEach((pt) => {
         const { cx, cy } = toCanvasCoords(pt.x, pt.y);
 
-        // Glow
         const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, 20);
         grd.addColorStop(0, 'rgba(16, 185, 129, 0.3)');
         grd.addColorStop(1, 'rgba(16, 185, 129, 0)');
@@ -94,23 +93,17 @@ function drawPoints() {
         ctx.arc(cx, cy, 20, 0, Math.PI * 2);
         ctx.fill();
 
-        // Point
         ctx.fillStyle = '#10b981';
         ctx.beginPath();
         ctx.arc(cx, cy, 7, 0, Math.PI * 2);
         ctx.fill();
 
-        // Inner highlight
         ctx.fillStyle = 'rgba(255,255,255,0.4)';
         ctx.beginPath();
         ctx.arc(cx - 2, cy - 2, 2, 0, Math.PI * 2);
         ctx.fill();
 
-        // Label
-        const label = pt.name.length > 18
-            ? pt.name.substring(0, 18) + '...'
-            : pt.name;
-
+        const label = pt.name.length > 18 ? pt.name.substring(0, 18) + '...' : pt.name;
         ctx.font = 'bold 11px monospace';
         const textWidth = ctx.measureText(label).width;
 
@@ -127,12 +120,8 @@ function drawQuery() {
 
     const { cx, cy } = toCanvasCoords(activeQuery.x, activeQuery.y);
 
-    // Connection line to matched node
     if (activeQuery.target) {
-        const { cx: tx, cy: ty } = toCanvasCoords(
-            activeQuery.target.x,
-            activeQuery.target.y
-        );
+        const { cx: tx, cy: ty } = toCanvasCoords(activeQuery.target.x, activeQuery.target.y);
 
         ctx.strokeStyle = 'rgba(245, 158, 11, 0.6)';
         ctx.lineWidth = 2;
@@ -143,18 +132,12 @@ function drawQuery() {
         ctx.stroke();
         ctx.setLineDash([]);
 
-        // Distance label on line
         const midX = (cx + tx) / 2;
         const midY = (cy + ty) / 2;
         ctx.fillStyle = 'rgba(245, 158, 11, 0.9)';
         ctx.font = 'bold 11px monospace';
-        ctx.fillText(
-            `d=${activeQuery.distance.toFixed(3)}`,
-            midX + 6,
-            midY - 4
-        );
+        ctx.fillText(`d=${activeQuery.distance.toFixed(3)}`, midX + 6, midY - 4);
 
-        // Highlight matched point ring
         ctx.strokeStyle = '#f59e0b';
         ctx.lineWidth = 3;
         ctx.beginPath();
@@ -162,7 +145,6 @@ function drawQuery() {
         ctx.stroke();
     }
 
-    // Query glow
     const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, 25);
     grd.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
     grd.addColorStop(1, 'rgba(59, 130, 246, 0)');
@@ -171,10 +153,8 @@ function drawQuery() {
     ctx.arc(cx, cy, 25, 0, Math.PI * 2);
     ctx.fill();
 
-    // Star shape
     drawStar(cx, cy, 5, 10, 5, '#3b82f6');
 
-    // Query label
     ctx.font = 'bold 12px monospace';
     ctx.fillStyle = 'rgba(7, 11, 24, 0.8)';
     ctx.fillRect(cx + 14, cy - 10, 80, 18);
@@ -190,15 +170,9 @@ function drawStar(cx, cy, spikes, outerRadius, innerRadius, color) {
     ctx.moveTo(cx, cy - outerRadius);
 
     for (let i = 0; i < spikes; i++) {
-        ctx.lineTo(
-            cx + Math.cos(rot) * outerRadius,
-            cy + Math.sin(rot) * outerRadius
-        );
+        ctx.lineTo(cx + Math.cos(rot) * outerRadius, cy + Math.sin(rot) * outerRadius);
         rot += step;
-        ctx.lineTo(
-            cx + Math.cos(rot) * innerRadius,
-            cy + Math.sin(rot) * innerRadius
-        );
+        ctx.lineTo(cx + Math.cos(rot) * innerRadius, cy + Math.sin(rot) * innerRadius);
         rot += step;
     }
 
@@ -210,19 +184,31 @@ function drawStar(cx, cy, spikes, outerRadius, innerRadius, color) {
 
 // ─── Algorithm Toggle ─────────────────────────────────
 function setAlgo(algo) {
+    console.log(`Setting algorithm to: ${algo}`); // Debug log
     selectedAlgo = algo;
 
-    const btnHnsw = document.getElementById('btnHnsw');
-    const btnBrute = document.getElementById('btnBrute');
-    const algoDisplay = document.getElementById('algoDisplay');
+    // Remove active class from all buttons
+    document.getElementById('btnHnsw').classList.remove('active');
+    document.getElementById('btnKdTree').classList.remove('active');
+    document.getElementById('btnBrute').classList.remove('active');
 
-    if (btnHnsw) btnHnsw.classList.toggle('active', algo === 'hnsw');
-    if (btnBrute) btnBrute.classList.toggle('active', algo === 'brute_force');
-    if (algoDisplay) {
-        algoDisplay.innerHTML = `Algorithm: <strong>${
-            algo === 'hnsw' ? 'HNSW' : 'Brute Force'
-        }</strong>`;
+    // Add active class to selected button
+    if (algo === 'hnsw') {
+        document.getElementById('btnHnsw').classList.add('active');
+    } else if (algo === 'kdtree') {
+        document.getElementById('btnKdTree').classList.add('active');
+    } else if (algo === 'brute_force') {
+        document.getElementById('btnBrute').classList.add('active');
     }
+
+    // Update display
+    const algoNames = {
+        'hnsw': 'HNSW',
+        'kdtree': 'KD-Tree',
+        'brute_force': 'Brute Force'
+    };
+
+    setEl('algoDisplay', `Algorithm: <strong>${algoNames[algo]}</strong>`, true);
 }
 
 // ─── Embed Document ───────────────────────────────────
@@ -231,11 +217,6 @@ async function embedDocument() {
     const contentEl = document.getElementById('docContent');
     const btn = document.getElementById('embedBtn');
     const btnText = document.getElementById('embedBtnText');
-
-    if (!nameEl || !contentEl) {
-        console.error('Form elements not found');
-        return;
-    }
 
     const name = nameEl.value.trim();
     const content = contentEl.value.trim();
@@ -248,12 +229,6 @@ async function embedDocument() {
     if (btn) btn.disabled = true;
     if (btnText) btnText.textContent = '⏳ Embedding...';
 
-    updateSteps([
-        { text: 'Chunking document text...', state: 'done' },
-        { text: 'Generating 768D embeddings with nomic-embed-text...', state: 'active' },
-        { text: 'Inserting into FAISS indexes...', state: 'idle' }
-    ], 'Embedding');
-
     try {
         const res = await fetch('/embed', {
             method: 'POST',
@@ -261,13 +236,8 @@ async function embedDocument() {
             body: JSON.stringify({ name, content })
         });
 
-        if (!res.ok) {
-            throw new Error(`Server error: ${res.status}`);
-        }
-
         const data = await res.json();
 
-        // Add points
         data.chunks.forEach(chunk => {
             indexedPoints.push({
                 name: chunk.name,
@@ -277,34 +247,21 @@ async function embedDocument() {
             });
         });
 
-        // Update UI safely
         setEl('statDocs', indexedPoints.length);
         setEl('docCount', `${indexedPoints.length} documents`);
 
-        // Hide empty state
         const emptyEl = document.getElementById('canvasEmpty');
         if (emptyEl) emptyEl.style.display = 'none';
 
         drawCanvas();
 
-        updateSteps([
-            { text: `Document chunked into ${data.chunks_inserted} piece(s)`, state: 'done' },
-            { text: `768D embeddings generated successfully`, state: 'done' },
-            { text: `Inserted into BruteForce & HNSW FAISS indexes`, state: 'done' },
-            { text: `Total vectors in memory: ${data.total_chunks}`, state: 'done' }
-        ], 'Done ✅');
-
-        // Clear form
         nameEl.value = '';
         contentEl.value = '';
 
-        console.log(`✅ Indexed "${name}" → ${data.chunks_inserted} chunk(s)`);
+        console.log(`✅ Embedded: ${name}`);
 
     } catch (err) {
         console.error('Embed error:', err);
-        updateSteps([
-            { text: `❌ Error: ${err.message}`, state: 'active' }
-        ], 'Error');
         alert(`Error: ${err.message}`);
     }
 
@@ -318,11 +275,6 @@ async function submitQuery() {
     const btn = document.getElementById('queryBtn');
     const btnText = document.getElementById('queryBtnText');
 
-    if (!queryEl) {
-        console.error('Query input not found');
-        return;
-    }
-
     const text = queryEl.value.trim();
 
     if (!text) {
@@ -333,15 +285,7 @@ async function submitQuery() {
     if (btn) btn.disabled = true;
     if (btnText) btnText.textContent = '⏳ Searching...';
 
-    setEl('responseArea', '<div class="response-placeholder">⏳ Generating response...</div>', true);
-    setEl('matchInfo', '<div class="match-placeholder">🔍 Searching vector space...</div>', true);
-
-    updateSteps([
-        { text: 'Embedding query with nomic-embed-text...', state: 'active' },
-        { text: `Running ${selectedAlgo.toUpperCase()} search...`, state: 'idle' },
-        { text: 'Retrieving matched context...', state: 'idle' },
-        { text: 'Generating LLM response...', state: 'idle' }
-    ], 'Searching');
+    console.log(`Querying with algorithm: ${selectedAlgo}`); // Debug log
 
     try {
         const res = await fetch('/query', {
@@ -350,21 +294,14 @@ async function submitQuery() {
             body: JSON.stringify({ text, algorithm: selectedAlgo })
         });
 
-        if (!res.ok) {
-            throw new Error(`Server error: ${res.status}`);
-        }
-
         const data = await res.json();
 
         queryCount++;
 
-        // Update stats safely
         setEl('statQueries', queryCount);
         setEl('statTime', `${data.search_time}ms`);
         setEl('queryCount', `${queryCount} queries`);
-        setEl('searchTime', `${data.search_time}ms`);
 
-        // Update canvas
         const targetNode = indexedPoints.find(p => p.name === data.closest_node);
         activeQuery = {
             x: data.query_vector[0],
@@ -375,40 +312,22 @@ async function submitQuery() {
 
         drawCanvas();
 
-        // Update steps
-        if (data.steps && data.steps.length > 0) {
-            updateSteps(
-                data.steps.map(s => ({ text: s, state: 'done' })),
-                'Complete ✅'
-            );
-        }
-
-        // Show response
         setEl('responseArea', `
             <div class="response-text">${data.response}</div>
-            ${data.context
-                ? `<div class="context-box">📄 Context used: ${data.context}</div>`
-                : ''
-            }
+            ${data.context ? `<div class="context-box"><strong>📄 Context:</strong><br>${data.context}</div>` : ''}
         `, true);
 
         setEl('responseBadge', data.algorithm_used);
 
-        // Match details
-        const distPercent = Math.min(100, (data.distance / 2) * 100);
-
-        if (data.closest_node !== 'None') {
+        if (data.closest_node !== 'None' && data.closest_node !== '🧠 General AI') {
             setEl('matchInfo', `
                 <div class="match-row">
                     <span class="match-key">Matched Node</span>
                     <span class="match-val green">${data.closest_node}</span>
                 </div>
                 <div class="match-row">
-                    <span class="match-key">Distance Score</span>
+                    <span class="match-key">Distance</span>
                     <span class="match-val orange">${data.distance.toFixed(4)}</span>
-                    <div class="distance-bar">
-                        <div class="distance-fill" style="width: ${100 - distPercent}%"></div>
-                    </div>
                 </div>
                 <div class="match-row">
                     <span class="match-key">Search Time</span>
@@ -421,20 +340,13 @@ async function submitQuery() {
             `, true);
             setEl('matchBadge', '✅ Match Found');
         } else {
-            setEl('matchInfo', '<div class="match-placeholder">⚠️ No match found within threshold</div>', true);
+            setEl('matchInfo', '<div class="match-placeholder">⚠️ No match found</div>', true);
             setEl('matchBadge', '❌ No Match');
         }
 
     } catch (err) {
         console.error('Query error:', err);
-        setEl('responseArea', `
-            <div class="response-text" style="color: var(--red)">
-                ❌ Error: ${err.message}
-            </div>
-        `, true);
-        updateSteps([
-            { text: `❌ Error: ${err.message}`, state: 'active' }
-        ], 'Error');
+        setEl('responseArea', `<div class="response-text" style="color: var(--red)">❌ Error: ${err.message}</div>`, true);
     }
 
     if (btn) btn.disabled = false;
@@ -443,7 +355,7 @@ async function submitQuery() {
 
 // ─── Clear All ────────────────────────────────────────
 async function clearAll() {
-    if (!confirm('Clear all indexed documents and reset the vector space?')) return;
+    if (!confirm('Clear all data?')) return;
 
     try {
         await fetch('/documents', { method: 'DELETE' });
@@ -459,22 +371,14 @@ async function clearAll() {
         setEl('queryCount', '0 queries');
         setEl('matchBadge', '—');
         setEl('responseBadge', 'Ready');
-        setEl('stepsBadge', 'Idle');
 
-        setEl('responseArea', '<div class="response-placeholder">Response will appear here after querying...</div>', true);
-        setEl('matchInfo', '<div class="match-placeholder">Similarity match details will appear here...</div>', true);
+        setEl('responseArea', '<div class="response-placeholder">Response will appear here...</div>', true);
+        setEl('matchInfo', '<div class="match-placeholder">Match details will appear here...</div>', true);
 
         const emptyEl = document.getElementById('canvasEmpty');
         if (emptyEl) emptyEl.style.display = 'flex';
 
         drawCanvas();
-
-        updateSteps([
-            { text: 'All data cleared', state: 'done' },
-            { text: 'FAISS indexes reset', state: 'done' },
-            { text: 'Ready for new documents', state: 'done' }
-        ], 'Reset');
-
         console.log('🗑️ All data cleared');
 
     } catch (err) {
@@ -483,29 +387,14 @@ async function clearAll() {
     }
 }
 
-// ─── Update Steps ─────────────────────────────────────
-function updateSteps(steps, badge) {
-    const list = document.getElementById('stepsList');
-    if (list) {
-        list.innerHTML = steps.map(s => `
-            <div class="step-item ${s.state}">
-                <span class="step-dot"></span>
-                ${s.text}
-            </div>
-        `).join('');
-    }
-
-    setEl('stepsBadge', badge);
-}
-
 // ─── Enter Key Handler ────────────────────────────────
 function handleEnter(event) {
     if (event.key === 'Enter') submitQuery();
 }
 
-// ─── Init ─────────────────────────────────────────────
+// ─── Initialize ───────────────────────────────────────
 window.addEventListener('load', () => {
     resizeCanvas();
     drawCanvas();
-    console.log('✅ VectorRAG system initialized');
+    console.log('✅ VectorRAG initialized with 3 algorithms');
 });
