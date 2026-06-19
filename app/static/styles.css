@@ -80,7 +80,7 @@ html, body {
     font-size: 18px;
     font-weight: 800;
     background: linear-gradient(135deg, var(--blue), var(--purple));
-    -webkit-background-clip: text;
+    
     -webkit-text-fill-color: transparent;
 }
 
@@ -354,7 +354,7 @@ html, body {
     font-size: 22px;
     font-weight: 800;
     background: linear-gradient(135deg, var(--text), var(--blue));
-    -webkit-background-clip: text;
+    
     -webkit-text-fill-color: transparent;
 }
 
